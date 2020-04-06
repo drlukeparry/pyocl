@@ -2,3 +2,4 @@ nose
 sphinx
 numpy
 pyopencl
+mako

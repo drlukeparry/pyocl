@@ -1,4 +1,5 @@
-![Python application](https://github.com/drlukeparry/pyocl/workflows/Python%20application/badge.svg)
+.. image:: https://github.com/drlukeparry/pyocl/workflows/Python%20application/badge.svg
+  :target: https://github.com/drlukeparry/pyocl/actions
 
 PyOCL Module Repository
 ========================

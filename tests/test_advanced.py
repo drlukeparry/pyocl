@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-
 from .context import pyocl
 
 import unittest
 import platform
 import tempfile
-import unittest
-
 
 class AdvancedTestSuite(unittest.TestCase):
     """Advanced test cases."""

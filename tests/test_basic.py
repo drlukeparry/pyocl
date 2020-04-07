@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-from .context import sample
+from .context import pyocl
 
 import unittest
 import platform
 import tempfile
-import unittest
 
 
 class BasicTestSuite(unittest.TestCase):

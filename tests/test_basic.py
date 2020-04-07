@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .context import pyocl
+from .context import sample
 
 import unittest
 import platform

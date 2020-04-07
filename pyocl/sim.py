@@ -38,7 +38,6 @@ class OpenCLSimBase:
 
         self.program = cl.Program(self.myocl.context, self.kernel).build(options=buildOptions)
 
-
     #        try:
     #            self.program = cl.Program(self.myocl.context, self.kernel).build()
     #        except:
@@ -46,106 +45,107 @@ class OpenCLSimBase:
     #            print(self.program.get_build_info(self.myocl.device, cl.program_build_info.ERROR))
     #            raise
 
-def setDebugBuild(self, state: bool):
-    """
-    Sets the compilation and build of the OpenCL kernel to use debug flags
-    :param state:
-    """
-    self._isDebugBuild = state
+
+    def setDebugBuild(self, state: bool):
+        """
+        Sets the compilation and build of the OpenCL kernel to use debug flags
+        :param state:
+        """
+        self._isDebugBuild = state
 
 
-def isDebugBuild(self) -> bool:
-    """
-    Returns if the build includes debug flags
+    def isDebugBuild(self) -> bool:
+        """
+        Returns if the build includes debug flags
 
-    :return: bool: build
-    """
-    return self._isDebugBuild
-
-
-@property
-def dimensions(self) -> int:
-    """
-    Return the dimensions of the kernel launched
-
-    :return: int: The kernel dimensions
-    """
-    return self._dims
+        :return: bool: build
+        """
+        return self._isDebugBuild
 
 
-@dimensions.setter
-def dimensions(self, dims: int):
-    """
-    Return the dimensions of the kernel launched
+    @property
+    def dimensions(self) -> int:
+        """
+        Return the dimensions of the kernel launched
 
-    :param dims: int: Returns the dimensions for the kernel
-    """
-    self._dims = dims
-
-
-def isKernelAvailable(self):
-    return self.program and len(self.program.all_kernels())
+        :return: int: The kernel dimensions
+        """
+        return self._dims
 
 
-@property
-def workGroupSize(self) -> int:
-    """
-    The chosen workgroup size for the kernel launch
+    @dimensions.setter
+    def dimensions(self, dims: int):
+        """
+        Return the dimensions of the kernel launched
 
-    :return: tuple(int,int): The workgroup size
-    """
-    return self._workGroupSize
-
-
-@workGroupSize.setter
-def workGroupSize(self, wgSize: tuple()):
-    """
-    Sets the work group size to be used by the kernel.
-
-    :param wgSize: tuple():  The work group size
-    """
-    self._workGroupSize = wgSize
+        :param dims: int: Returns the dimensions for the kernel
+        """
+        self._dims = dims
 
 
-def getLocalMemorySize(self) -> int:
-    """
-    Returns the calculated local memory size based oen the compiled kernel.
-     A return of -1 indicates the kernel is not available.
-
-    :return: int - Calculated memory size in [bytes]
-    """
-    if not self.isKernelAvailable():
-        return -1
-
-    return self.program.all_kernels()[0].get_work_group_info(cl.kernel_work_group_info.LOCAL_MEM_SIZE,
-                                                             self.myocl.device)
+    def isKernelAvailable(self):
+        return self.program and len(self.program.all_kernels())
 
 
-def getRecommendedWorkGroupSizeMultiple(self) -> int:
-    """
-    Returns the recommended mulitple of workgroup size for the device.
-    A return of -1 indicates the kernel is not available.
+    @property
+    def workGroupSize(self) -> int:
+        """
+        The chosen workgroup size for the kernel launch
 
-    :return: int - Returns the work groupsize recommendations
-    """
-
-    if not self.isKernelAvailable():
-        return -1
-
-    return self.program.all_kernels()[0].get_work_group_info(
-        cl.kernel_work_group_info.PREFERRED_WORK_GROUP_SIZE_MULTIPLE,
-        self.myocl.device)
+        :return: tuple(int,int): The workgroup size
+        """
+        return self._workGroupSize
 
 
-def getMaximumWorkGroupSize(self) -> int:
-    """
-    Returns the maximum workgroup size for the device.
-    A return of -1 indicates the kernel is not available.
+    @workGroupSize.setter
+    def workGroupSize(self, wgSize: tuple()):
+        """
+        Sets the work group size to be used by the kernel.
 
-    :return: int - Returns the maximum work group size
-    """
-    if not self.isKernelAvailable():
-        return -1
+        :param wgSize: tuple():  The work group size
+        """
+        self._workGroupSize = wgSize
 
-    return self.program.all_kernels()[0].get_work_group_info(cl.kernel_work_group_info.WORK_GROUP_SIZE,
-                                                             self.myocl.device)
+
+    def getLocalMemorySize(self) -> int:
+        """
+        Returns the calculated local memory size based oen the compiled kernel.
+         A return of -1 indicates the kernel is not available.
+
+        :return: int - Calculated memory size in [bytes]
+        """
+        if not self.isKernelAvailable():
+            return -1
+
+        return self.program.all_kernels()[0].get_work_group_info(cl.kernel_work_group_info.LOCAL_MEM_SIZE,
+                                                                 self.myocl.device)
+
+
+    def getRecommendedWorkGroupSizeMultiple(self) -> int:
+        """
+        Returns the recommended mulitple of workgroup size for the device.
+        A return of -1 indicates the kernel is not available.
+
+        :return: int - Returns the work groupsize recommendations
+        """
+
+        if not self.isKernelAvailable():
+            return -1
+
+        return self.program.all_kernels()[0].get_work_group_info(
+                cl.kernel_work_group_info.PREFERRED_WORK_GROUP_SIZE_MULTIPLE,
+                self.myocl.device)
+
+
+    def getMaximumWorkGroupSize(self) -> int:
+        """
+        Returns the maximum workgroup size for the device.
+        A return of -1 indicates the kernel is not available.
+
+        :return: int - Returns the maximum work group size
+        """
+        if not self.isKernelAvailable():
+            return -1
+
+        return self.program.all_kernels()[0].get_work_group_info(cl.kernel_work_group_info.WORK_GROUP_SIZE,
+                                                                 self.myocl.device)

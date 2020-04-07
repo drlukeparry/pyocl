@@ -1,3 +1,5 @@
+![Python application](https://github.com/drlukeparry/pyocl/workflows/Python%20application/badge.svg)
+
 PyOCL Module Repository
 ========================
 

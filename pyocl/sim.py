@@ -25,26 +25,26 @@ class OpenCLSimBase:
         Create the OpenCL context, generates the compiled kernel.
         """
 
-    self.myocl = Core()
+        self.myocl = Core()
 
-    # Create a command queue
-    self.queue = cl.CommandQueue(self.myocl.context, properties=cl.command_queue_properties.PROFILING_ENABLE)
+        # Create a command queue
+        self.queue = cl.CommandQueue(self.myocl.context, properties=cl.command_queue_properties.PROFILING_ENABLE)
 
-    # Compile and build the openCL program
-    buildOptions = []
+        # Compile and build the openCL program
+        buildOptions = []
 
-    if self.isDebugBuild:
-        buildOptions += ['-g']  # -g
+        if self.isDebugBuild:
+            buildOptions += ['-g']  # -g
 
-    self.program = cl.Program(self.myocl.context, self.kernel).build(options=buildOptions)
+        self.program = cl.Program(self.myocl.context, self.kernel).build(options=buildOptions)
 
 
-#        try:
-#            self.program = cl.Program(self.myocl.context, self.kernel).build()
-#        except:
-#            logging.error("Error:")
-#            print(self.program.get_build_info(self.myocl.device, cl.program_build_info.ERROR))
-#            raise
+    #        try:
+    #            self.program = cl.Program(self.myocl.context, self.kernel).build()
+    #        except:
+    #            logging.error("Error:")
+    #            print(self.program.get_build_info(self.myocl.device, cl.program_build_info.ERROR))
+    #            raise
 
 def setDebugBuild(self, state: bool):
     """

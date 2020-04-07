@@ -1,12 +1,23 @@
 # -*- coding: utf-8 -*-
-
+import os
 from enum import Enum, auto
 from typing import List
 import logging
 import pyopencl as cl
 
-class Core:
 
+
+class OpenCLFlags(Enum):
+    """
+    Enums for setting options for the OpenCL Class
+    """
+    ENABLE_DEBUG = auto()
+    ENABLE_COMPILER_OUTPUT = auto()
+    ENABLE_CACHE = auto()  # 'PYOPENCL_NO_CACHE=1'
+    DISABLE_NON_FINITE_MATH = auto()  # '-cl-finite-math-only
+    DISABLE_OPTIMISATIONS = auto()  # '-cl-opt-disable'
+
+class Core:
     """
     PyOCL Core Class
 
@@ -15,24 +26,15 @@ class Core:
     environment to develop in.
     """
 
-    class OpenCLFlags(Enum):
-        """
-        Enums for setting options for the OpenCL Class
-        """
-        ENABLE_DEBUG = auto()
-        DISABLE_CACHE = auto()            # 'PYOPENCL_NO_CACHE=1'
-        DISABLE_NON_FINITE_MATH = auto()  # '-cl-finite-math-only, -cl-finite-math-only'
-
     def __init__(self, useGPU: bool = True) -> None:
         self._isUsingGPU = useGPU
         self._gl_interop = False
         self._clDevice = None
 
         # Show compiled output by setting envrionment flag
-        import os
+        self.enableCompilerOutput(OpenCLFlags.ENABLE_COMPILER_OUTPUT)
+        self.enableCompilerCache(OpenCLFlags.ENABLE_CACHE)
 
-        os.environ["PYOPENCL_COMPILER_OUTPUT"] = '1'
-        os.environ["PYOPENCL_NO_CACHE"] = "1"
         os.environ["AMPLXE_LOG_LEVEL"] = "TRACE"
         os.environ["TPSS_DEBUG"] = "1"
 
@@ -59,7 +61,8 @@ class Core:
 
             try:
                 self._context = cl.Context(
-                    properties = [(cl.context_properties.PLATFORM, self.platform)] + get_gl_sharing_context_properties())
+                        properties=[(cl.context_properties.PLATFORM,
+                                     self.platform)] + get_gl_sharing_context_properties())
                 self._gl_interop = True
             except:
                 logging.warning('Issue with GL Sharing at runtime')
@@ -69,6 +72,18 @@ class Core:
         else:
             self._context = cl.Context(properties=[(cl.context_properties.PLATFORM, self.platform)],
                                        devices=[self.device])
+
+    def enableCompilerCache(self, state : int) -> None:
+        """
+        :param state: provide a OpenCLFlag
+        """
+        os.environ["PYOPENCL_NO_CACHE"] = '1' if (state == OpenCLFlags.ENABLE_CACHE) else '1'
+
+    def enableCompilerOutput(self, state: int) -> None:
+        """
+        :param state: provide a OpenCLFlag
+        """
+        os.environ["PYOPENCL_COMPILER_OUTPUT"] = '' if (state == OpenCLFlags. ENABLE_COMPILER_OUTPUT) else '1'
 
     @property
     def device(self) -> cl.Device:
@@ -81,11 +96,18 @@ class Core:
     def platform(self) -> cl.Platform:
         """
         Returns the current OpenCL Device
+
+        :rtype: cl.Platform
         """
         return self._platform
 
     @property
-    def context(self):
+    def context(self) -> cl.Context:
+        """
+        Returns the chosen generated OpenCL context
+
+        :return: cl.Context:
+        """
         return self._context
 
     def useGLInterop(self) -> bool:
@@ -95,9 +117,9 @@ class Core:
         return self._isUsingGPU
 
     def hasSharedMemory(self) -> bool:
-
         """
         Returns if the currently selected Compute Device has shared memory capability (e.g. APU, Intel Platforms)
+
         :return: bool
         """
         if self.deviceType() == 'Intel GPU':
@@ -115,6 +137,7 @@ class Core:
 
         """
         Returns list of GPU devices based on the currently chosen platform
+
         :return: list of clDevices
         """
         return self.platform.get_devices(cl.device_type.GPU)
@@ -124,56 +147,58 @@ class Core:
 
         """
         Returns list of CPU devices based on the currently chosen platform
+
         :return: list of clDevices
         """
         return self.platform.get_devices(cl.device_type.CPU)
 
     @property
     def computeUnits(self) -> int:
-
         """
         Returns the number of compute units available on the selected compute device
+
         :return: number of compute units available
         """
         return self.device.max_compute_units
 
     @property
     def localMemorySize(self) -> int:
-
         """
         Returns the local size of memory available on the compute device
+
         :return: Size of local memory available [bytes]
         """
         return self.device.local_mem_size
 
     @property
     def globalMemorySize(self) -> int:
-
         """
         Returns the global size of memory available on the compute device
+        
         :return: Size of global memory available [bytes]
         """
         return self.device.global_mem_size
 
     def hasFloat16(self) -> bool:
-
         """
          Returns if the compute device has native float16 support
-         :return: number of compute units available
+
+         :return: bool: Native float16 support available
          """
         return 'cl_khr_fp16' in self.platform.extensions
 
     def hasDouble(self) -> bool:
-
         """
          Returns if the compute device has native float64 (double) support
-         :return: number of compute units available
+
+         :return: bool: Native float64 support available
          """
         return 'cl_khr_fp64' in self.platform.extensions
 
     def hasGLShare(self) -> bool:
-
         """
          Returns if the compute device has native GL Sharing Capabilities (within driver)
+
+         :return: bool: Native GLInterop Sharing support available
          """
         return 'cl_khr_gl_sharing' in self.platform.extensions

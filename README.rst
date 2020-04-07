@@ -1,5 +1,5 @@
 .. image:: https://github.com/drlukeparry/pyocl/workflows/Python%20application/badge.svg
-  :target: https://github.com/drlukeparry/pyocl/actions)
+  :target: https://github.com/drlukeparry/pyocl/actions
 
 PyOCL Module Repository
 ========================

@@ -1,0 +1,6 @@
+sphinx
+numpy
+autodocsumm
+pypandoc
+sphinx-automodapi
+sphinx-autodoc-typehints

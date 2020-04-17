@@ -11,7 +11,12 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+Module Reference
+==================
+.. toctree::
+   :maxdepth: 2
 
+   modules
 
 Indices and tables
 ==================

@@ -9,6 +9,7 @@ from setuptools import setup, find_packages
 requirements_default = set([
     'numpy',     # all data structures
     'pyopencl',
+    'mako',
     'setuptools'  # used for packaging
 ])
 
@@ -16,7 +17,6 @@ requirements_default = set([
 # anything on Windows, Linux, and Mac, for Python 2.7-3.4+
 requirements_easy = set([
     'setuptools',  # do setuptools stuff
-    'mako',        # For efficiently creating templates
     'colorlog'])   # log in pretty colors
 
 
@@ -24,7 +24,9 @@ requirements_easy = set([
 requirements_docs = set([
     'sphinx',
     'jupyter',
-    'sphinx_rtd_theme'])
+    'sphinx_rtd_theme',
+    'pypandoc',
+    'autodocsumm'])
 
 with open('README.rst') as f:
     readme = f.read()

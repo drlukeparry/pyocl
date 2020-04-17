@@ -6,7 +6,6 @@ import logging
 import pyopencl as cl
 
 
-
 class OpenCLFlags(Enum):
     """
     Enums for setting options for the OpenCL Class
@@ -16,6 +15,7 @@ class OpenCLFlags(Enum):
     ENABLE_CACHE = auto()  # 'PYOPENCL_NO_CACHE=1'
     DISABLE_NON_FINITE_MATH = auto()  # '-cl-finite-math-only
     DISABLE_OPTIMISATIONS = auto()  # '-cl-opt-disable'
+
 
 class Core:
     """
@@ -97,7 +97,7 @@ class Core:
         """
         Returns the current OpenCL Device
 
-        :rtype: cl.Platform
+        :return: The OpenCL Platform currently selected
         """
         return self._platform
 
@@ -106,7 +106,7 @@ class Core:
         """
         Returns the chosen generated OpenCL context
 
-        :return: cl.Context:
+        :return: The OpenCL Context
         """
         return self._context
 
@@ -120,7 +120,7 @@ class Core:
         """
         Returns if the currently selected Compute Device has shared memory capability (e.g. APU, Intel Platforms)
 
-        :return: bool
+        :return:
         """
         if self.deviceType() == 'Intel GPU':
             return True
@@ -183,7 +183,7 @@ class Core:
         """
          Returns if the compute device has native float16 support
 
-         :return: bool: Native float16 support available
+         :return: Native float16 support available
          """
         return 'cl_khr_fp16' in self.platform.extensions
 
@@ -191,7 +191,7 @@ class Core:
         """
          Returns if the compute device has native float64 (double) support
 
-         :return: bool: Native float64 support available
+         :return: Native float64 support available
          """
         return 'cl_khr_fp64' in self.platform.extensions
 
@@ -199,6 +199,6 @@ class Core:
         """
          Returns if the compute device has native GL Sharing Capabilities (within driver)
 
-         :return: bool: Native GLInterop Sharing support available
+         :return: Native GLInterop Sharing support available
          """
         return 'cl_khr_gl_sharing' in self.platform.extensions

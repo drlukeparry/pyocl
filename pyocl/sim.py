@@ -1,7 +1,8 @@
 from enum import Enum, auto
-from typing import List
+from typing import List, Tuple
 import logging
 import pyopencl as cl
+
 from .core import Core
 
 
@@ -12,7 +13,7 @@ class OpenCLSimBase:
     """
 
     def __init__(self):
-        self.myocl = None
+        self.ocl = None
         self.queue = None
         self.program = None
         self.kernel = None
@@ -25,10 +26,10 @@ class OpenCLSimBase:
         Create the OpenCL context, generates the compiled kernel.
         """
 
-        self.myocl = Core()
+        self.ocl = Core()
 
         # Create a command queue
-        self.queue = cl.CommandQueue(self.myocl.context, properties=cl.command_queue_properties.PROFILING_ENABLE)
+        self.queue = cl.CommandQueue(self.ocl.context, properties=cl.command_queue_properties.PROFILING_ENABLE)
 
         # Compile and build the openCL program
         buildOptions = []
@@ -36,19 +37,20 @@ class OpenCLSimBase:
         if self.isDebugBuild:
             buildOptions += ['-g']  # -g
 
-        self.program = cl.Program(self.myocl.context, self.kernel).build(options=buildOptions)
+        self.program = cl.Program(self.ocl.context, self.kernel).build(options=buildOptions)
 
     #        try:
-    #            self.program = cl.Program(self.myocl.context, self.kernel).build()
+    #            self.program = cl.Program(self.ocl.context, self.kernel).build()
     #        except:
     #            logging.error("Error:")
-    #            print(self.program.get_build_info(self.myocl.device, cl.program_build_info.ERROR))
+    #            print(self.program.get_build_info(self.ocl.device, cl.program_build_info.ERROR))
     #            raise
 
 
     def setDebugBuild(self, state: bool):
         """
         Sets the compilation and build of the OpenCL kernel to use debug flags
+
         :param state:
         """
         self._isDebugBuild = state
@@ -58,17 +60,17 @@ class OpenCLSimBase:
         """
         Returns if the build includes debug flags
 
-        :return: bool: build
+        :return: Debug Build State
         """
         return self._isDebugBuild
 
 
     @property
-    def dimensions(self) -> int:
+    def dimensions(self) -> Tuple:
         """
         Return the dimensions of the kernel launched
 
-        :return: int: The kernel dimensions
+        :return: The kernel dimensions
         """
         return self._dims
 
@@ -78,7 +80,7 @@ class OpenCLSimBase:
         """
         Return the dimensions of the kernel launched
 
-        :param dims: int: Returns the dimensions for the kernel
+        :param dims: Returns the dimensions for the kernel
         """
         self._dims = dims
 
@@ -88,21 +90,21 @@ class OpenCLSimBase:
 
 
     @property
-    def workGroupSize(self) -> int:
+    def workGroupSize(self) -> Tuple:
         """
         The chosen workgroup size for the kernel launch
 
-        :return: tuple(int,int): The workgroup size
+        :return: The workgroup size
         """
         return self._workGroupSize
 
 
     @workGroupSize.setter
-    def workGroupSize(self, wgSize: tuple()):
+    def workGroupSize(self, wgSize: Tuple()):
         """
         Sets the work group size to be used by the kernel.
 
-        :param wgSize: tuple():  The work group size
+        :param wgSize: The work group size
         """
         self._workGroupSize = wgSize
 
@@ -112,13 +114,13 @@ class OpenCLSimBase:
         Returns the calculated local memory size based oen the compiled kernel.
          A return of -1 indicates the kernel is not available.
 
-        :return: int - Calculated memory size in [bytes]
+        :return: Calculated memory size in [bytes]
         """
         if not self.isKernelAvailable():
             return -1
 
         return self.program.all_kernels()[0].get_work_group_info(cl.kernel_work_group_info.LOCAL_MEM_SIZE,
-                                                                 self.myocl.device)
+                                                                 self.ocl.device)
 
 
     def getRecommendedWorkGroupSizeMultiple(self) -> int:
@@ -134,7 +136,7 @@ class OpenCLSimBase:
 
         return self.program.all_kernels()[0].get_work_group_info(
                 cl.kernel_work_group_info.PREFERRED_WORK_GROUP_SIZE_MULTIPLE,
-                self.myocl.device)
+                self.ocl.device)
 
 
     def getMaximumWorkGroupSize(self) -> int:
@@ -142,10 +144,10 @@ class OpenCLSimBase:
         Returns the maximum workgroup size for the device.
         A return of -1 indicates the kernel is not available.
 
-        :return: int - Returns the maximum work group size
+        :return: Returns the maximum work group size
         """
         if not self.isKernelAvailable():
             return -1
 
         return self.program.all_kernels()[0].get_work_group_info(cl.kernel_work_group_info.WORK_GROUP_SIZE,
-                                                                 self.myocl.device)
+                                                                 self.ocl.device)

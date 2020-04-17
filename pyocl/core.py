@@ -75,12 +75,16 @@ class Core:
 
     def enableCompilerCache(self, state : int) -> None:
         """
+        Sets PyOpenCL to use compiler caching to improve warm-up time
+
         :param state: provide a OpenCLFlag
         """
         os.environ["PYOPENCL_NO_CACHE"] = '1' if (state == OpenCLFlags.ENABLE_CACHE) else '1'
 
     def enableCompilerOutput(self, state: int) -> None:
         """
+        Sets PyOpenCL to enable the compiler output including errors
+
         :param state: provide a OpenCLFlag
         """
         os.environ["PYOPENCL_COMPILER_OUTPUT"] = '' if (state == OpenCLFlags. ENABLE_COMPILER_OUTPUT) else '1'

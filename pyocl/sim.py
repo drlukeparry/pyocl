@@ -100,7 +100,7 @@ class OpenCLSimBase:
 
 
     @workGroupSize.setter
-    def workGroupSize(self, wgSize: Tuple()):
+    def workGroupSize(self, wgSize: Tuple):
         """
         Sets the work group size to be used by the kernel.
 

@@ -13,7 +13,7 @@ class OpenCLFlags(Enum):
     ENABLE_DEBUG = auto()
     ENABLE_COMPILER_OUTPUT = auto()
     ENABLE_CACHE = auto()  # 'PYOPENCL_NO_CACHE=1'
-    DISABLE_NON_FINITE_MATH = asuto()  # '-cl-finite-math-only
+    DISABLE_NON_FINITE_MATH = auto()  # '-cl-finite-math-only
     DISABLE_OPTIMISATIONS = auto()  # '-cl-opt-disable'
 
 
@@ -28,6 +28,8 @@ class Core:
 
     def __init__(self, device = None, useGPU: bool = True) -> None:
 
+        self._isUsingOpenCL2 = False
+        self._isDebugBuild = False
         self._isUsingGPU = useGPU
         self._gl_interop = False
         self._clDevice = None
@@ -64,7 +66,7 @@ class Core:
             else:
                 raise RuntimeError('No OpenCL device currently available')
 
-        if self.isUsingGpu() and cl.have_gl() and self.hasGLShareExtension():
+        if self.isUsingGPU() and cl.have_gl() and self.hasGLShareExtension():
             from pyopencl.tools import get_gl_sharing_context_properties
 
             # Try setting up an OpenCL context with a Gl_Sharing
@@ -83,13 +85,50 @@ class Core:
                                        devices=[self.device])
 
     @staticmethod
-    def enableCompilerCache(state : int) -> None:
+    def enableCompilerCache(state: OpenCLFlags) -> None:
         """
         Sets PyOpenCL to use compiler caching to improve warm-up time
 
         :param state: provide a OpenCLFlag
         """
-        os.environ["PYOPENCL_NO_CACHE"] = '1' if (state == OpenCLFlags.ENABLE_CACHE) else '1'
+        os.environ["PYOPENCL_NO_CACHE"] = '1' if (state == OpenCLFlags.ENABLE_CACHE) else '0'
+
+    def openCLVersion(self) -> Tuple[int,int]:
+        return self._platform._get_cl_version()
+
+    def setUseOpenCL2(self, state:bool) -> None:
+        """
+        Set if OpenCL2 should be used in the compiler flags
+        """
+
+        if state and self.openCLVersion()[0] != 2:
+            raise ValueError('OpenCL Platform <{:s}> is not OpenCL2 Compatible'.format(self.platform.name))
+
+        self._isUsingOpenCL2 = state
+
+    def isUsingOpenCL2(self) -> bool:
+        """
+        Returns true if OpenCL2.x is being used for compiling kernels
+        """
+
+        return self._isUsingOpenCL2
+
+    def setDebugBuild(self, state: bool):
+        """
+        Sets the compilation and build of the OpenCL kernel to use debug flags
+
+        :param state:
+        """
+        self._isDebugBuild = state
+
+
+    def isDebugBuild(self) -> bool:
+        """
+        Returns if the build includes debug flags
+
+        :return: Debug Build State
+        """
+        return self._isDebugBuild
 
     @staticmethod
     def enableCompilerOutput(state: int) -> None:
@@ -98,7 +137,7 @@ class Core:
 
         :param state: provide a OpenCLFlag
         """
-        os.environ["PYOPENCL_COMPILER_OUTPUT"] = '' if (state == OpenCLFlags. ENABLE_COMPILER_OUTPUT) else '1'
+        os.environ["PYOPENCL_COMPILER_OUTPUT"] = '0' if (state == OpenCLFlags. ENABLE_COMPILER_OUTPUT) else '1'
 
     def isUsingGPU(self) -> bool:
         """

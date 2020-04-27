@@ -1,12 +1,13 @@
 from enum import Enum, auto
-from typing import List, Tuple
+import abc
+from typing import Any, List, Tuple
 import logging
 import pyopencl as cl
 
 from .core import Core
 
 
-class OpenCLSimBase:
+class OpenCLSimBase(abc.ABC):
     """
     OpenCL Sim class for creating the runtime. Other classes should derive from this class and set both the kernel.
     The derived class should specify the kernel input as a string
@@ -17,7 +18,6 @@ class OpenCLSimBase:
         self.queue = None
         self.program = None
         self.kernel = None
-        self._isDebugBuild = False
         self._workGroupSize = (64, 1)
         self._dims = 2  # dimension of problem
 
@@ -34,8 +34,11 @@ class OpenCLSimBase:
         # Compile and build the openCL program
         buildOptions = []
 
-        if self.isDebugBuild:
-            buildOptions += ['-g']  # -g
+        if self.ocl.isDebugBuild():
+            buildOptions += ['-g']
+
+        if self.ocl.isUsingOpenCL2():
+            buildOptions += ['-cl-std=CL2.0']
 
         self.program = cl.Program(self.ocl.context, self.kernel).build(options=buildOptions)
 
@@ -47,26 +50,8 @@ class OpenCLSimBase:
     #            raise
 
 
-    def setDebugBuild(self, state: bool):
-        """
-        Sets the compilation and build of the OpenCL kernel to use debug flags
-
-        :param state:
-        """
-        self._isDebugBuild = state
-
-
-    def isDebugBuild(self) -> bool:
-        """
-        Returns if the build includes debug flags
-
-        :return: Debug Build State
-        """
-        return self._isDebugBuild
-
-
     @property
-    def dimensions(self) -> Tuple:
+    def dimensions(self) -> int:
         """
         Return the dimensions of the kernel launched
 
@@ -84,13 +69,16 @@ class OpenCLSimBase:
         """
         self._dims = dims
 
-
-    def isKernelAvailable(self):
+    def isKernelAvailable(self) -> bool:
         return self.program and len(self.program.all_kernels())
 
+    @property
+    @abc.abstractmethod
+    def kernel(self):
+        raise NotImplementedError()
 
     @property
-    def workGroupSize(self) -> Tuple:
+    def workGroupSize(self) -> Tuple[int, ...]:
         """
         The chosen workgroup size for the kernel launch
 
@@ -100,12 +88,15 @@ class OpenCLSimBase:
 
 
     @workGroupSize.setter
-    def workGroupSize(self, wgSize: Tuple):
+    def workGroupSize(self, wgSize: Any):
         """
         Sets the work group size to be used by the kernel.
 
         :param wgSize: The work group size
         """
+        if isinstance(wgSize,int):
+            wgSize = tuple(wgSize)
+
         self._workGroupSize = wgSize
 
 
